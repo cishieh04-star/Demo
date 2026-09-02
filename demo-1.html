@@ -73,15 +73,15 @@
   .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; }
   .target-sub { font-size: 14px; color: #334155; font-weight: bold; margin-top: 2px; }
   
-  /* 四位數單位底色區分（不改變數字顏色，避免誤導） */
+  /* 四位數單位底色區分 */
   .wan-unit-bg {
-    background-color: #dbeafe; /* 淡藍色代表萬級 */
+    background-color: #dbeafe; 
     padding: 2px 6px;
     border-radius: 6px;
     border: 1px solid #bfdbfe;
   }
   .ge-unit-bg {
-    background-color: #fee2e2; /* 淡紅色代表個級 */
+    background-color: #fee2e2; 
     padding: 2px 6px;
     border-radius: 6px;
     border: 1px solid #fecaca;
@@ -122,7 +122,7 @@
 
   #warningMsg { font-size: 12px; font-weight: bold; color: #e65100; height: 16px; background: #fff; text-align: center; flex-shrink: 0; }
 
-  /* 掉落方塊區域：單一獨立方塊循環，絕不重疊 */
+  /* 掉落方塊區域 */
   .drop-field {
     flex: 0 0 150px; 
     margin: 4px 10px; padding: 4px;
@@ -196,9 +196,9 @@
       <div class="intro-card">
         <h3>📖 更新亮點說明</h3>
         <ul>
-          <li><strong>單一獨立掉落：</strong>每次只掉落一個方塊，絕不重疊！</li>
-          <li><strong>四位數底色分組：</strong>以不同底色區分萬級與個級，不混淆數字本身。</li>
-          <li><strong>互動小精靈：</strong>點擊下方動物會隨機變身為你加油！</li>
+          <li><strong>點擊方塊現身：</strong>點擊掉落的方塊時，會瞬間出現可愛的卡通小精靈！</li>
+          <li><strong>單一獨立掉落：</strong>每次只掉落一個方塊，絕不重疊。</li>
+          <li><strong>四位數底色分組：</strong>以不同底色區分萬級與個級。</li>
         </ul>
       </div>
 
@@ -207,7 +207,6 @@
   </div>
 
   <div id="gameContainer">
-    <!-- 標題與四位數底色區分顯示 -->
     <div class="header">
       <div class="header-left">
         <div class="box-icon">🎯</div>
@@ -238,7 +237,7 @@
 
     <div id="warningMsg"></div>
     
-    <!-- 俄羅斯方塊掉落區（單一乾淨軌道） -->
+    <!-- 俄羅斯方塊掉落區 -->
     <div class="drop-field" id="dropField"></div>
 
     <!-- 國小標準定位板 -->
@@ -305,7 +304,7 @@
   let audioUnlocked = false; 
   let isWinning = false;
   let isPaused = false;
-  let currentActiveBlock = null; // 確保畫面上只有一個方塊
+  let currentActiveBlock = null; 
   let blockTimeout = null;
   let currentSpeedVal = 2; 
 
@@ -322,6 +321,8 @@
   const cartoonBubble = document.getElementById('cartoonBubble');
   const cartoonAvatar = document.getElementById('cartoonAvatar');
 
+  // 方塊點擊時隨機出現的卡通人物圖示
+  let blockAvatars = ["🐶", "🐱", "🐰", "🐼", "🦁", "🦄", "⭐", "🎈", "🤖"];
   let avatars = ["🦊", "🐰", "🐼", "🦁", "🦄", "🐸", "🐯"];
   let avIdx = 0;
 
@@ -411,7 +412,6 @@
     nextQuestion();
   }
 
-  // 以四個位數為單位（萬級與個級），用不同的底色區分
   function formatBackgroundGroupedNumber(numStr) {
     if (numStr.length <= 4) {
       return `<span class="ge-unit-bg">${numStr}</span>`;
@@ -477,7 +477,6 @@
     }
   }
 
-  // 確保同一時間畫面上只有一個方塊，落完後才自動生成下一個
   function spawnFallingDigit() {
     if (isPaused || isWinning) return;
     
@@ -511,13 +510,20 @@
       e.stopPropagation();
       if (isWinning || isPaused) return;
 
+      // 點擊方塊時，瞬間將數字變成卡通人物造型特效
+      let randomCartoon = blockAvatars[Math.floor(Math.random() * blockAvatars.length)];
+      digitEl.innerText = randomCartoon;
+      digitEl.style.background = "#fbbf24";
+
       if (chosenDigit === correctDigit) {
         playDropSound();
         document.getElementById(currentPlace.id).innerText = chosenDigit;
         document.getElementById(currentPlace.boxId).classList.remove('active-place');
         
-        digitEl.remove();
-        currentActiveBlock = null;
+        setTimeout(() => {
+          digitEl.remove();
+          currentActiveBlock = null;
+        }, 250);
 
         currentStep++;
         if (currentStep >= placeKeys.length) {
@@ -543,17 +549,18 @@
           placeTitleBar.innerText = `📍 請接著選擇【${nextPlace.name}】的數字：`;
           speakText(`答對了！請找${nextPlace.name}`, 1.0);
           
-          // 產生下一個方塊
           blockTimeout = setTimeout(spawnFallingDigit, 600);
         }
       } else {
         playErrorSound();
         warningMsg.innerText = `❌ ${currentPlace.name}不是 ${chosenDigit} 喔，再試一次！`;
         speakText("選錯囉，再找找看", 1.0);
-        digitEl.remove();
-        currentActiveBlock = null;
+        
+        setTimeout(() => {
+          digitEl.remove();
+          currentActiveBlock = null;
+        }, 250);
 
-        // 錯了之後很快掉落下一個新方塊讓小朋友重新選擇
         blockTimeout = setTimeout(spawnFallingDigit, 400);
       }
     };
@@ -563,7 +570,6 @@
     digitEl.addEventListener('animationend', () => {
       digitEl.remove();
       currentActiveBlock = null;
-      // 若方塊到底沒點到，自動掉落下一個
       if (!isWinning && !isPaused) {
         blockTimeout = setTimeout(spawnFallingDigit, 200);
       }
