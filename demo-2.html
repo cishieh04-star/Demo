@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-<title>位值方塊遊戲：認識百萬以內的數字</title>
+<title>位值概念遊戲：認識十萬以內的數字</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
   * { 
@@ -27,7 +27,7 @@
     display: flex; flex-direction: column; 
     height: 100vh; height: 100dvh; 
     width: 100%;
-    max-width: 650px; margin: 0 auto; 
+    max-width: 600px; margin: 0 auto; 
     position: relative;
     overflow: hidden;
   }
@@ -60,7 +60,7 @@
   }
   .start-btn:active { transform: scale(0.95); }
 
-  /* 標題列：以不同底色區分四位數單位 */
+  /* 標題列 */
   .header {
     padding: 10px 14px; background: #fff;
     flex: 0 0 auto; 
@@ -70,21 +70,27 @@
   .header-left { display: flex; align-items: center; gap: 10px; width: 80%; }
   .box-icon { font-size: 32px; line-height: 1; }
   .target-content { display: flex; flex-direction: column; text-align: left; width: 100%; }
-  .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; }
+  .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; display: flex; align-items: center; gap: 4px; }
   .target-sub { font-size: 14px; color: #334155; font-weight: bold; margin-top: 2px; }
   
-  /* 四位數底色區分 */
+  /* 緊密連在一起的四位數分組底色（確保萬位與千位緊鄰） */
+  .number-group-box {
+    display: inline-flex;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    vertical-align: middle;
+    background: #fff;
+  }
   .wan-unit-bg {
-    background-color: #dbeafe; /* 淡藍色代表萬級以上 */
+    background-color: #bfdbfe; 
     padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid #bfdbfe;
+    color: #1e3a8a;
   }
   .ge-unit-bg {
-    background-color: #fee2e2; /* 淡紅色代表個級 */
+    background-color: #fecaca; 
     padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid #fecaca;
+    color: #991b1b;
   }
 
   .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -122,23 +128,23 @@
 
   #warningMsg { font-size: 12px; font-weight: bold; color: #e65100; height: 16px; background: #fff; text-align: center; flex-shrink: 0; }
 
-  /* 掉落方塊區域：單一獨立方塊循環，絕不重疊 */
+  /* 掉落方塊區域 */
   .drop-field {
-    flex: 0 0 140px; 
+    flex: 0 0 145px; 
     margin: 4px 10px; padding: 4px;
     border: 3px dashed #94a3b8; background: #eef2f7; border-radius: 12px;
     position: relative;
     overflow: hidden;
-    touch-action: none; 
+    touch-action: manipulation; 
   }
 
   .falling-digit {
     position: absolute;
-    width: 65px; height: 48px; 
-    background: #ff6b6b; color: white; border: 2px solid #c92a2a; border-radius: 10px;
+    width: 65px; height: 50px; 
+    background: #ff6b6b; color: white; border: 2px solid #c92a2a; border-radius: 8px;
     display: flex; justify-content: center; align-items: center; 
     font-size: 22px; font-weight: bold; cursor: pointer; text-align: center;
-    box-shadow: 1px 2px 6px rgba(0,0,0,0.3); transition: transform 0.1s;
+    box-shadow: 1px 3px 6px rgba(0,0,0,0.3); transition: transform 0.1s;
     animation: fall linear forwards;
     z-index: 10;
   }
@@ -146,10 +152,10 @@
 
   @keyframes fall {
     0% { top: -60px; }
-    100% { top: 90px; }
+    100% { top: 95px; }
   }
 
-  /* 國小標準定位板區域（擴充至7位數：百萬至個） */
+  /* 國小標準定位板區域（最高到十萬位，共6格） */
   .place-table-container {
     flex: 0 0 auto;
     margin: 4px 10px; padding: 8px;
@@ -158,10 +164,10 @@
   .place-title-bar { font-size: 12px; font-weight: bold; color: #334155; margin-bottom: 6px; text-align: center; }
   
   .place-table {
-    display: flex; justify-content: space-between; gap: 3px;
+    display: flex; justify-content: space-between; gap: 4px;
   }
   .digit-box {
-    flex: 1; height: 55px;
+    flex: 1; height: 58px;
     border: 2px solid #cbd5e1; border-radius: 8px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: #f8fafc; transition: all 0.3s;
@@ -169,36 +175,51 @@
   .digit-box.active-place {
     border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 8px rgba(37,99,235,0.3);
   }
-  .digit-box-title { font-size: 9px; color: #64748b; margin-bottom: 2px; }
-  .digit-box-val { font-size: 16px; font-weight: bold; color: #0f172a; }
+  .digit-box-title { font-size: 10px; color: #64748b; margin-bottom: 2px; }
+  .digit-box-val { font-size: 18px; font-weight: bold; color: #0f172a; }
 
-  /* 卡通互動列 */
+  /* 卡通互動列與旁邊的籃球畫面 */
   .cartoon-bar {
     flex: 0 0 auto;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
     background: #fffbeb; padding: 6px 12px; margin: 0 10px 8px 10px; border-radius: 10px; border: 2px solid #fde68a;
   }
-  .cartoon-avatar { font-size: 28px; cursor: pointer; animation: bounce 2s infinite; transition: transform 0.2s; }
+  .cartoon-left { display: flex; align-items: center; gap: 8px; }
+  .cartoon-avatar { font-size: 26px; cursor: pointer; animation: bounce 2s infinite; transition: transform 0.2s; }
   .cartoon-avatar:active { transform: scale(1.3) rotate(15deg); }
   @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-3px); }
   }
-  .cartoon-bubble { font-size: 12px; font-weight: bold; background: #fff; padding: 5px 10px; border-radius: 8px; border: 1px solid #fcd34d; color: #92400e; }
+  .cartoon-bubble { font-size: 11px; font-weight: bold; background: #fff; padding: 4px 8px; border-radius: 8px; border: 1px solid #fcd34d; color: #92400e; }
+  
+  .basketball-preview {
+    display: flex; align-items: center; gap: 4px; background: #ffedd5; padding: 4px 8px; border-radius: 8px; border: 1px solid #fdba74; font-size: 12px; font-weight: bold; color: #c2410c;
+  }
+
+  /* 安全嵌入下方的跳關按鈕 */
+  #skipBtnContainer {
+    display: none; padding: 4px 10px 8px 10px; text-align: center; flex: 0 0 auto;
+  }
+  #skipBtn {
+    font-size: 14px; font-weight: bold; padding: 6px 18px;
+    background: #10b981; color: white; border: 2px solid #047857; border-radius: 15px;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
 </style>
 </head>
 <body>
 
   <div id="startScreen">
     <div class="start-content-box">
-      <h1>🌸 位值方塊遊戲：認識百萬以內的數字</h1>
+      <h1>🌸 位值概念遊戲：認識十萬以內的數字</h1>
 
       <div class="intro-card">
-        <h3>📖 更新亮點說明</h3>
+        <h3>📖 遊戲說明</h3>
         <ul>
-          <li><strong>數字擴大至百萬：</strong>挑戰範圍升級為百萬以內的數！</li>
-          <li><strong>單一獨立掉落：</strong>每次只掉落一個方塊，絕不重疊。</li>
-          <li><strong>7位數定位板：</strong>從個位一路挑戰到百萬位！</li>
+          <li><strong>認識九十九萬以內的數：</strong>最高到十萬位（取消百萬格子），挑戰十萬至九十九萬的數字！</li>
+          <li><strong>完整位值突破：</strong>從個位、十位、百位、千位、萬位到十萬位，絕不跳過任何一個位值。</li>
+          <li><strong>旁邊出現籃球：</strong>點擊方塊時，旁邊會即時出現籃球畫面互動！</li>
         </ul>
       </div>
 
@@ -207,7 +228,6 @@
   </div>
 
   <div id="gameContainer">
-    <!-- 標題與四位數底色區分顯示 -->
     <div class="header">
       <div class="header-left">
         <div class="box-icon">🎯</div>
@@ -241,14 +261,10 @@
     <!-- 俄羅斯方塊掉落區 -->
     <div class="drop-field" id="dropField"></div>
 
-    <!-- 國小標準定位板（7位數：百萬、十萬、萬、千、百、十、個） -->
+    <!-- 國小標準定位板（最高到十萬位，共6格，無百萬格） -->
     <div class="place-table-container">
       <div class="place-title-bar" id="placeTitleBar">📍 請先選擇【個位】的數字：</div>
       <div class="place-table">
-        <div class="digit-box" id="box_baiwan">
-          <div class="digit-box-title">百萬位</div>
-          <div class="digit-box-val" id="p_baiwan">?</div>
-        </div>
         <div class="digit-box" id="box_shiwan">
           <div class="digit-box-title">十萬位</div>
           <div class="digit-box-val" id="p_shiwan">?</div>
@@ -276,35 +292,37 @@
       </div>
     </div>
 
-    <!-- 卡通小精靈 -->
+    <!-- 卡通小精靈與旁邊的籃球畫面 -->
     <div class="cartoon-bar">
-      <div class="cartoon-avatar" id="cartoonAvatar" onclick="interactCartoon()" title="點我變身！">🦊</div>
-      <div class="cartoon-bubble" id="cartoonBubble">點我一下，看看我變身成什麼動物！</div>
+      <div class="cartoon-left">
+        <div class="cartoon-avatar" id="cartoonAvatar" onclick="interactCartoon()" title="點我變身！">🦊</div>
+        <div class="cartoon-bubble" id="cartoonBubble">點擊上方掉落方塊挑戰！</div>
+      </div>
+      <div class="basketball-preview">
+        <span>籃球互動:</span> <span id="ballIconDisplay" style="font-size: 16px;">🏀</span>
+      </div>
+    </div>
+    
+    <!-- 安全嵌入下方的跳關按鈕 -->
+    <div id="skipBtnContainer">
+      <button id="skipBtn" onclick="forceNextRound()">➡️ 進入下一題</button>
     </div>
   </div>
 
 <script>
-  // 擴充至百萬以內的題庫
-  const questions = [
+  // 隨機題庫（九十九萬以內的數）
+  const questionPool = [
+    { num: 40980, text: "四萬零九百八十" },
+    { num: 51957, text: "五萬一千九百五十七" },
+    { num: 34670, text: "三萬四千六百七十" },
+    { num: 27724, text: "二萬七千七百二十四" },
+    { num: 83215, text: "八萬三千二百一十五" },
+    { num: 60492, text: "六萬零四百九十二" },
     { num: 345678, text: "三十四萬五千六百七十八" },
-    { num: 1204500, text: "一百二十萬四千五百" },
-    { num: 5080203, text: "五百零八萬零二百零三" },
-    { num: 987654, text: "九十當萬七千六百五十四".replace("十當", "八") }, // 修正：九十八萬七千六百五十四
-    { num: 987654, text: "九十八萬七千六百五十四" },
-    { num: 1000000, text: "一百萬" }
+    { num: 987654, text: "九十八萬七千六百五十四" }
   ];
 
-  // 定位順序：個 -> 十 -> 百 -> 千 -> 萬 -> 十萬 -> 百萬
-  const placeKeys = [
-    { key: 'ge', name: '個位', id: 'p_ge', boxId: 'box_ge', divisor: 1, mod: 10 },
-    { key: 'shi', name: '十位', id: 'p_shi', boxId: 'box_shi', divisor: 10, mod: 10 },
-    { key: 'bai', name: '百位', id: 'p_bai', boxId: 'box_bai', divisor: 100, mod: 10 },
-    { key: 'qian', name: '千位', id: 'p_qian', boxId: 'box_qian', divisor: 1000, mod: 10 },
-    { key: 'wan', name: '萬位', id: 'p_wan', boxId: 'box_wan', divisor: 10000, mod: 10 },
-    { key: 'shiwan', name: '十萬位', id: 'p_shiwan', boxId: 'box_shiwan', divisor: 100000, mod: 10 },
-    { key: 'baiwan', name: '百萬位', id: 'p_baiwan', boxId: 'box_baiwan', divisor: 1000000, mod: 10 }
-  ];
-
+  let questions = [];
   let currentQIndex = 0;
   let currentStep = 0; 
   let currentTargetNum = 0;
@@ -316,6 +334,16 @@
   let currentActiveBlock = null; 
   let blockTimeout = null;
   let currentSpeedVal = 2; 
+
+  // 定位順序：嚴格由右至左（個位 -> 十位 -> 百位 -> 千位 -> 萬位 -> 十萬位），取消百萬
+  const placeKeys = [
+    { key: 'ge', name: '個位', id: 'p_ge', boxId: 'box_ge', divisor: 1, mod: 10 },
+    { key: 'shi', name: '十位', id: 'p_shi', boxId: 'box_shi', divisor: 10, mod: 10 },
+    { key: 'bai', name: '百位', id: 'p_bai', boxId: 'box_bai', divisor: 100, mod: 10 },
+    { key: 'qian', name: '千位', id: 'p_qian', boxId: 'box_qian', divisor: 1000, mod: 10 },
+    { key: 'wan', name: '萬位', id: 'p_wan', boxId: 'box_wan', divisor: 10000, mod: 10 },
+    { key: 'shiwan', name: '十萬位', id: 'p_shiwan', boxId: 'box_shiwan', divisor: 100000, mod: 10 }
+  ];
 
   const displayTarget = document.getElementById('displayTarget');
   const displayTargetText = document.getElementById('displayTargetText');
@@ -329,6 +357,8 @@
   const placeTitleBar = document.getElementById('placeTitleBar');
   const cartoonBubble = document.getElementById('cartoonBubble');
   const cartoonAvatar = document.getElementById('cartoonAvatar');
+  const ballIconDisplay = document.getElementById('ballIconDisplay');
+  const skipBtnContainer = document.getElementById('skipBtnContainer');
 
   let avatars = ["🦊", "🐰", "🐼", "🦁", "🦄", "🐸", "🐯"];
   let avIdx = 0;
@@ -408,10 +438,14 @@
 
     if ('speechSynthesis' in window) {
       try {
+        window.speechSynthesis.cancel();
         let unlockSpeech = new SpeechSynthesisUtterance('');
         window.speechSynthesis.speak(unlockSpeech);
       } catch(e) {}
     }
+
+    questions = [...questionPool].sort(() => Math.random() - 0.5);
+    currentQIndex = 0;
 
     startScreen.style.display = 'none';
     successCount = 0; 
@@ -419,30 +453,35 @@
     nextQuestion();
   }
 
-  // 支援到百萬的四位數底色分組
-  function formatBackgroundGroupedNumber(numStr) {
+  // 緊密結合萬位與千位，避免過寬間距
+  function formatGroupedNumber(numStr) {
     if (numStr.length <= 4) {
-      return `<span class="ge-unit-bg">${numStr}</span>`;
-    } else if (numStr.length <= 8) {
+      return `<div class="number-group-box"><span class="ge-unit-bg">${numStr}</span></div>`;
+    } else {
       let wanPart = numStr.slice(0, numStr.length - 4);
       let gePart = numStr.slice(numStr.length - 4);
-      return `<span class="wan-unit-bg">${wanPart}</span><span style="margin:0 2px;"></span><span class="ge-unit-bg">${gePart}</span>`;
+      return `<div class="number-group-box"><span class="wan-unit-bg">${wanPart}</span><span class="ge-unit-bg">${gePart}</span></div>`;
     }
-    return numStr;
   }
 
   function nextQuestion() {
     isWinning = false;
     isPaused = false;
-    currentStep = 0; 
+    currentStep = 0; // 每次從個位開始
     pauseBtn.innerText = "⏸ 暫停";
+    skipBtnContainer.style.display = 'none';
+
+    if (currentQIndex >= questions.length) {
+      questions = [...questionPool].sort(() => Math.random() - 0.5);
+      currentQIndex = 0;
+    }
 
     let q = questions[currentQIndex];
     currentTargetNum = q.num;
     currentTargetText = q.text;
 
     let numStr = currentTargetNum.toString();
-    displayTarget.innerHTML = formatBackgroundGroupedNumber(numStr);
+    displayTarget.innerHTML = formatGroupedNumber(numStr);
     displayTargetText.innerText = `讀法：${currentTargetText}`;
     
     placeKeys.forEach(p => {
@@ -519,15 +558,20 @@
       e.stopPropagation();
       if (isWinning || isPaused) return;
 
+      ballIconDisplay.innerText = "🏀🔥 命中籃球！";
+      setTimeout(() => { ballIconDisplay.innerText = "🏀"; }, 1000);
+
       if (chosenDigit === correctDigit) {
         playDropSound();
         document.getElementById(currentPlace.id).innerText = chosenDigit;
         document.getElementById(currentPlace.boxId).classList.remove('active-place');
         
-        digitEl.remove();
-        currentActiveBlock = null;
+        setTimeout(() => {
+          digitEl.remove();
+          currentActiveBlock = null;
+        }, 200);
 
-        currentStep++;
+        currentStep++; // 推進到下一個位值（個 -> 十 -> 百 -> 千 -> 萬 -> 十萬）
         if (currentStep >= placeKeys.length) {
           isWinning = true;
           if (blockTimeout) clearTimeout(blockTimeout);
@@ -543,39 +587,51 @@
             colors: ['#FFD700', '#ff0000', '#00ff00', '#0000ff']
           });
 
-          currentQIndex = (currentQIndex + 1) % questions.length;
-          setTimeout(nextQuestion, 7000);
+          skipBtnContainer.style.display = 'block';
+
+          currentQIndex++;
+          setTimeout(nextQuestion, 5000);
         } else {
           let nextPlace = placeKeys[currentStep];
           document.getElementById(nextPlace.boxId).classList.add('active-place');
           placeTitleBar.innerText = `📍 請接著選擇【${nextPlace.name}】的數字：`;
           speakText(`答對了！請找${nextPlace.name}`, 1.0);
           
-          blockTimeout = setTimeout(spawnFallingDigit, 600);
+          blockTimeout = setTimeout(spawnFallingDigit, 400);
         }
       } else {
         playErrorSound();
         warningMsg.innerText = `❌ ${currentPlace.name}不是 ${chosenDigit} 喔，再試一次！`;
         speakText("選錯囉，再找找看", 1.0);
-        digitEl.remove();
-        currentActiveBlock = null;
+        
+        setTimeout(() => {
+          digitEl.remove();
+          currentActiveBlock = null;
+        }, 200);
 
-        blockTimeout = setTimeout(spawnFallingDigit, 400);
+        blockTimeout = setTimeout(spawnFallingDigit, 300);
       }
     };
 
     digitEl.addEventListener('pointerdown', handleTouch);
+    digitEl.addEventListener('click', handleTouch);
 
     digitEl.addEventListener('animationend', () => {
       digitEl.remove();
       currentActiveBlock = null;
       if (!isWinning && !isPaused) {
-        blockTimeout = setTimeout(spawnFallingDigit, 200);
+        blockTimeout = setTimeout(spawnFallingDigit, 150);
       }
     });
 
     dropField.appendChild(digitEl);
     currentActiveBlock = digitEl;
+  }
+
+  function forceNextRound() {
+    skipBtnContainer.style.display = 'none';
+    if (blockTimeout) clearTimeout(blockTimeout);
+    nextQuestion();
   }
 
   function interactCartoon() {
@@ -584,9 +640,9 @@
     let currentPlace = placeKeys[currentStep];
     const dialogs = [
       `加油！現在要找的是「${currentPlace.name}」喔！`,
-      "從右邊的個位數慢慢往左邊推敲就對了！",
-      "注意看上方以底色區分的百萬與個級，不要漏掉零喔！",
-      "太棒了！你做得很好，挑戰百萬大關！"
+      "從右邊的個位數、十位數、百位數、千位數慢慢往左邊推敲就對了！",
+      "注意看上方以底色區分的萬級與個級，不要漏掉零喔！",
+      "太棒了！你做得很好，繼續保持！"
     ];
     let selectedMsg = dialogs[Math.floor(Math.random() * dialogs.length)];
     cartoonBubble.innerText = selectedMsg;
