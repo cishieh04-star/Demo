@@ -70,21 +70,27 @@
   .header-left { display: flex; align-items: center; gap: 10px; width: 80%; }
   .box-icon { font-size: 32px; line-height: 1; }
   .target-content { display: flex; flex-direction: column; text-align: left; width: 100%; }
-  .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; }
+  .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; display: flex; align-items: center; gap: 4px; }
   .target-sub { font-size: 14px; color: #334155; font-weight: bold; margin-top: 2px; }
   
-  /* 四位數單位底色調整：更清晰、對比更明顯，且讓萬位與千位靠得更近 */
+  /* 緊密連在一起的四位數分組底色（消除過寬間距） */
+  .number-group-box {
+    display: inline-flex;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    vertical-align: middle;
+    background: #fff;
+  }
   .wan-unit-bg {
-    background-color: #bfdbfe; /* 更清晰的藍色 */
+    background-color: #bfdbfe; 
     padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid #60a5fa;
+    color: #1e3a8a;
   }
   .ge-unit-bg {
-    background-color: #fecaca; /* 更清晰的紅色 */
+    background-color: #fecaca; 
     padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid #f87171;
+    color: #991b1b;
   }
 
   .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -124,7 +130,7 @@
 
   /* 掉落方塊區域 */
   .drop-field {
-    flex: 0 0 150px; 
+    flex: 0 0 145px; 
     margin: 4px 10px; padding: 4px;
     border: 3px dashed #94a3b8; background: #eef2f7; border-radius: 12px;
     position: relative;
@@ -146,7 +152,7 @@
 
   @keyframes fall {
     0% { top: -60px; }
-    100% { top: 95px; }
+    100% { top: 90px; }
   }
 
   /* 國小標準定位板區域 */
@@ -161,7 +167,7 @@
     display: flex; justify-content: space-between; gap: 4px;
   }
   .digit-box {
-    flex: 1; height: 58px;
+    flex: 1; height: 55px;
     border: 2px solid #cbd5e1; border-radius: 8px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: #f8fafc; transition: all 0.3s;
@@ -172,7 +178,7 @@
   .digit-box-title { font-size: 10px; color: #64748b; margin-bottom: 2px; }
   .digit-box-val { font-size: 18px; font-weight: bold; color: #0f172a; }
 
-  /* 卡通互動列與旁邊的籃球畫面 */
+  /* 卡通互動列與跳關按鈕區（不覆蓋畫面） */
   .cartoon-bar {
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -191,14 +197,14 @@
     display: flex; align-items: center; gap: 4px; background: #ffedd5; padding: 4px 8px; border-radius: 8px; border: 1px solid #fdba74; font-size: 12px; font-weight: bold; color: #c2410c;
   }
 
-  /* 手機防卡死跳關按鈕 */
+  /* 安全嵌入下方的跳關按鈕，絕不覆蓋遊戲區 */
   #skipBtnContainer {
-    display: block; position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%); z-index: 10000;
+    display: none; padding: 4px 10px 8px 10px; text-align: center; flex: 0 0 auto;
   }
   #skipBtn {
-    font-size: 15px; font-weight: bold; padding: 8px 20px;
-    background: #10b981; color: white; border: 3px solid #047857; border-radius: 20px;
-    cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 14px; font-weight: bold; padding: 6px 18px;
+    background: #10b981; color: white; border: 2px solid #047857; border-radius: 15px;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
 </style>
 </head>
@@ -211,9 +217,9 @@
       <div class="intro-card">
         <h3>📖 遊戲說明</h3>
         <ul>
-          <li><strong>俄羅斯方塊掉落：</strong>點擊掉落的數字方塊來進行位值配對。</li>
+          <li><strong>數字緊密排列：</strong>萬位與千位緊密相連，清楚辨識大數！</li>
           <li><strong>旁邊出現籃球：</strong>點擊方塊時，旁邊會即時出現籃球畫面互動！</li>
-          <li><strong>手機防卡死支援：</strong>下方附有保底跳關按鈕，任何手機都能順暢進行。</li>
+          <li><strong>安全按鈕佈局：</strong>跳關按鈕排在最下方，絕不遮擋遊戲畫面。</li>
         </ul>
       </div>
 
@@ -297,7 +303,7 @@
       </div>
     </div>
     
-    <!-- 保底防卡死過關按鈕 -->
+    <!-- 安全嵌入下方的跳關按鈕（不遮擋畫面） -->
     <div id="skipBtnContainer">
       <button id="skipBtn" onclick="forceNextRound()">➡️ 進入下一題</button>
     </div>
@@ -346,6 +352,7 @@
   const cartoonBubble = document.getElementById('cartoonBubble');
   const cartoonAvatar = document.getElementById('cartoonAvatar');
   const ballIconDisplay = document.getElementById('ballIconDisplay');
+  const skipBtnContainer = document.getElementById('skipBtnContainer');
 
   let avatars = ["🦊", "🐰", "🐼", "🦁", "🦄", "🐸", "🐯"];
   let avIdx = 0;
@@ -437,14 +444,14 @@
     nextQuestion();
   }
 
-  // 縮小萬位與千位之間的間距（不留多餘空白間隔）
-  function formatBackgroundGroupedNumber(numStr) {
+  // 將萬位與千位緊密結合成同一個外框，不留過寬間距
+  function formatGroupedNumber(numStr) {
     if (numStr.length <= 4) {
-      return `<span class="ge-unit-bg">${numStr}</span>`;
+      return `<div class="number-group-box"><span class="ge-unit-bg">${numStr}</span></div>`;
     } else {
       let wanPart = numStr.slice(0, numStr.length - 4);
       let gePart = numStr.slice(numStr.length - 4);
-      return `<span class="wan-unit-bg">${wanPart}</span><span class="ge-unit-bg">${gePart}</span>`;
+      return `<div class="number-group-box"><span class="wan-unit-bg">${wanPart}</span><span class="ge-unit-bg">${gePart}</span></div>`;
     }
   }
 
@@ -453,13 +460,14 @@
     isPaused = false;
     currentStep = 0; 
     pauseBtn.innerText = "⏸ 暫停";
+    skipBtnContainer.style.display = 'none';
 
     let q = questions[currentQIndex];
     currentTargetNum = q.num;
     currentTargetText = q.text;
 
     let numStr = currentTargetNum.toString();
-    displayTarget.innerHTML = formatBackgroundGroupedNumber(numStr);
+    displayTarget.innerHTML = formatGroupedNumber(numStr);
     displayTargetText.innerText = `讀法：${currentTargetText}`;
     
     placeKeys.forEach(p => {
@@ -536,7 +544,6 @@
       e.stopPropagation();
       if (isWinning || isPaused) return;
 
-      // 點擊方塊後，旁邊的籃球區即時出現互動畫面
       ballIconDisplay.innerText = "🏀🔥 命中籃球！";
       setTimeout(() => { ballIconDisplay.innerText = "🏀"; }, 1000);
 
@@ -566,8 +573,10 @@
             colors: ['#FFD700', '#ff0000', '#00ff00', '#0000ff']
           });
 
+          skipBtnContainer.style.display = 'block';
+
           currentQIndex = (currentQIndex + 1) % questions.length;
-          setTimeout(nextQuestion, 2500);
+          setTimeout(nextQuestion, 5000);
         } else {
           let nextPlace = placeKeys[currentStep];
           document.getElementById(nextPlace.boxId).classList.add('active-place');
@@ -606,6 +615,7 @@
   }
 
   function forceNextRound() {
+    skipBtnContainer.style.display = 'none';
     if (blockTimeout) clearTimeout(blockTimeout);
     nextQuestion();
   }
