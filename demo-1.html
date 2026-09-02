@@ -196,7 +196,7 @@
       <div class="intro-card">
         <h3>📖 更新亮點說明</h3>
         <ul>
-          <li><strong>點擊方塊現身：</strong>點擊掉落的方塊時，會瞬間出現可愛的卡通小精靈！</li>
+          <li><strong>點擊變籃球：</strong>點擊掉落的方塊時，會瞬間變成明顯的籃球🏀！</li>
           <li><strong>單一獨立掉落：</strong>每次只掉落一個方塊，絕不重疊。</li>
           <li><strong>四位數底色分組：</strong>以不同底色區分萬級與個級。</li>
         </ul>
@@ -321,8 +321,6 @@
   const cartoonBubble = document.getElementById('cartoonBubble');
   const cartoonAvatar = document.getElementById('cartoonAvatar');
 
-  // 方塊點擊時隨機出現的卡通人物圖示
-  let blockAvatars = ["🐶", "🐱", "🐰", "🐼", "🦁", "🦄", "⭐", "🎈", "🤖"];
   let avatars = ["🦊", "🐰", "🐼", "🦁", "🦄", "🐸", "🐯"];
   let avIdx = 0;
 
@@ -510,10 +508,10 @@
       e.stopPropagation();
       if (isWinning || isPaused) return;
 
-      // 點擊方塊時，瞬間將數字變成卡通人物造型特效
-      let randomCartoon = blockAvatars[Math.floor(Math.random() * blockAvatars.length)];
-      digitEl.innerText = randomCartoon;
-      digitEl.style.background = "#fbbf24";
+      // 點擊方塊時，瞬間變成籃球🏀
+      digitEl.innerText = "🏀";
+      digitEl.style.background = "#ea580c";
+      digitEl.style.borderColor = "#c2410c";
 
       if (chosenDigit === correctDigit) {
         playDropSound();
