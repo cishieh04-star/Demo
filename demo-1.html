@@ -73,7 +73,7 @@
   .target-display { font-size: 22px; font-weight: bold; line-height: 1.3; color: #0f172a; display: flex; align-items: center; gap: 4px; }
   .target-sub { font-size: 14px; color: #334155; font-weight: bold; margin-top: 2px; }
   
-  /* 緊密連在一起的四位數分組底色（消除過寬間距） */
+  /* 緊密連在一起的四位數分組底色 */
   .number-group-box {
     display: inline-flex;
     border: 2px solid #cbd5e1;
@@ -152,7 +152,7 @@
 
   @keyframes fall {
     0% { top: -60px; }
-    100% { top: 90px; }
+    100% { top: 95px; }
   }
 
   /* 國小標準定位板區域 */
@@ -167,7 +167,7 @@
     display: flex; justify-content: space-between; gap: 4px;
   }
   .digit-box {
-    flex: 1; height: 55px;
+    flex: 1; height: 58px;
     border: 2px solid #cbd5e1; border-radius: 8px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: #f8fafc; transition: all 0.3s;
@@ -178,7 +178,7 @@
   .digit-box-title { font-size: 10px; color: #64748b; margin-bottom: 2px; }
   .digit-box-val { font-size: 18px; font-weight: bold; color: #0f172a; }
 
-  /* 卡通互動列與跳關按鈕區（不覆蓋畫面） */
+  /* 卡通互動列與跳關按鈕區 */
   .cartoon-bar {
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -197,7 +197,7 @@
     display: flex; align-items: center; gap: 4px; background: #ffedd5; padding: 4px 8px; border-radius: 8px; border: 1px solid #fdba74; font-size: 12px; font-weight: bold; color: #c2410c;
   }
 
-  /* 安全嵌入下方的跳關按鈕，絕不覆蓋遊戲區 */
+  /* 安全嵌入下方的跳關按鈕 */
   #skipBtnContainer {
     display: none; padding: 4px 10px 8px 10px; text-align: center; flex: 0 0 auto;
   }
@@ -217,9 +217,9 @@
       <div class="intro-card">
         <h3>📖 遊戲說明</h3>
         <ul>
-          <li><strong>數字緊密排列：</strong>萬位與千位緊密相連，清楚辨識大數！</li>
+          <li><strong>隨機豐富題庫：</strong>每次出現的數字都不一樣，隨機挑戰十萬以內的數！</li>
+          <li><strong>完整位值突破：</strong>從個位、十位、百位、千位一路測驗到十萬位。</li>
           <li><strong>旁邊出現籃球：</strong>點擊方塊時，旁邊會即時出現籃球畫面互動！</li>
-          <li><strong>安全按鈕佈局：</strong>跳關按鈕排在最下方，絕不遮擋遊戲畫面。</li>
         </ul>
       </div>
 
@@ -303,30 +303,26 @@
       </div>
     </div>
     
-    <!-- 安全嵌入下方的跳關按鈕（不遮擋畫面） -->
+    <!-- 安全嵌入下方的跳關按鈕 -->
     <div id="skipBtnContainer">
       <button id="skipBtn" onclick="forceNextRound()">➡️ 進入下一題</button>
     </div>
   </div>
 
 <script>
-  const questions = [
+  // 豐富的隨機題庫（涵蓋十萬以內各種位值與補零狀況）
+  const questionPool = [
     { num: 40980, text: "四萬零九百八十" },
     { num: 51957, text: "五萬一千九百五十七" },
     { num: 34670, text: "三萬四千六百七十" },
     { num: 27724, text: "二萬七千七百二十四" },
-    { num: 100000, text: "十萬" }
+    { num: 83215, text: "八萬三千二百一十五" },
+    { num: 60492, text: "六萬零四百九十二" },
+    { num: 19034, text: "一萬九千零三十四" },
+    { num: 72008, text: "七萬二千零八" }
   ];
 
-  const placeKeys = [
-    { key: 'ge', name: '個位', id: 'p_ge', boxId: 'box_ge', divisor: 1, mod: 10 },
-    { key: 'shi', name: '十位', id: 'p_shi', boxId: 'box_shi', divisor: 10, mod: 10 },
-    { key: 'bai', name: '百位', id: 'p_bai', boxId: 'box_bai', divisor: 100, mod: 10 },
-    { key: 'qian', name: '千位', id: 'p_qian', boxId: 'box_qian', divisor: 1000, mod: 10 },
-    { key: 'wan', name: '萬位', id: 'p_wan', boxId: 'box_wan', divisor: 10000, mod: 10 },
-    { key: 'shiwan', name: '十萬位', id: 'p_shiwan', boxId: 'box_shiwan', divisor: 100000, mod: 10 }
-  ];
-
+  let questions = [];
   let currentQIndex = 0;
   let currentStep = 0; 
   let currentTargetNum = 0;
@@ -338,6 +334,16 @@
   let currentActiveBlock = null; 
   let blockTimeout = null;
   let currentSpeedVal = 2; 
+
+  // 定位順序：完整涵蓋 個位 -> 十位 -> 百位 -> 千位 -> 萬位 -> 十萬位
+  const placeKeys = [
+    { key: 'ge', name: '個位', id: 'p_ge', boxId: 'box_ge', divisor: 1, mod: 10 },
+    { key: 'shi', name: '十位', id: 'p_shi', boxId: 'box_shi', divisor: 10, mod: 10 },
+    { key: 'bai', name: '百位', id: 'p_bai', boxId: 'box_bai', divisor: 100, mod: 10 },
+    { key: 'qian', name: '千位', id: 'p_qian', boxId: 'box_qian', divisor: 1000, mod: 10 },
+    { key: 'wan', name: '萬位', id: 'p_wan', boxId: 'box_wan', divisor: 10000, mod: 10 },
+    { key: 'shiwan', name: '十萬位', id: 'p_shiwan', boxId: 'box_shiwan', divisor: 100000, mod: 10 }
+  ];
 
   const displayTarget = document.getElementById('displayTarget');
   const displayTargetText = document.getElementById('displayTargetText');
@@ -438,13 +444,17 @@
       } catch(e) {}
     }
 
+    // 每次開始遊戲時，將題庫隨機洗牌，確保題目順序與數字都不一樣
+    questions = [...questionPool].sort(() => Math.random() - 0.5);
+    currentQIndex = 0;
+
     startScreen.style.display = 'none';
     successCount = 0; 
     successCountSpan.innerText = successCount;
     nextQuestion();
   }
 
-  // 將萬位與千位緊密結合成同一個外框，不留過寬間距
+  // 緊密結合萬位與千位，避免間距過大
   function formatGroupedNumber(numStr) {
     if (numStr.length <= 4) {
       return `<div class="number-group-box"><span class="ge-unit-bg">${numStr}</span></div>`;
@@ -461,6 +471,11 @@
     currentStep = 0; 
     pauseBtn.innerText = "⏸ 暫停";
     skipBtnContainer.style.display = 'none';
+
+    if (currentQIndex >= questions.length) {
+      questions = [...questionPool].sort(() => Math.random() - 0.5);
+      currentQIndex = 0;
+    }
 
     let q = questions[currentQIndex];
     currentTargetNum = q.num;
@@ -575,7 +590,7 @@
 
           skipBtnContainer.style.display = 'block';
 
-          currentQIndex = (currentQIndex + 1) % questions.length;
+          currentQIndex++;
           setTimeout(nextQuestion, 5000);
         } else {
           let nextPlace = placeKeys[currentStep];
@@ -626,7 +641,7 @@
     let currentPlace = placeKeys[currentStep];
     const dialogs = [
       `加油！現在要找的是「${currentPlace.name}」喔！`,
-      "從右邊的個位數慢慢往左邊推敲就對了！",
+      "從右邊的個位數、十位數、百位數慢慢往左邊推敲就對了！",
       "注意看上方以底色區分的萬級與個級，不要漏掉零喔！",
       "太棒了！你做得很好，繼續保持！"
     ];
